@@ -8,6 +8,7 @@ const close_pop = document.querySelector(".close-pop");
 const overlay = document.querySelector(".overlay");
 
 getWeather("tanta");
+
 document.querySelector("form").addEventListener("submit", function (e) {
   e.preventDefault();
   getWeather(city.value);
@@ -20,36 +21,38 @@ async function getWeather(city) {
   // 11a9711568db4078a2575329241206
   // 11a9711568db4078a2575329241206
 
- try {
-  loader.classList.remove("d-none");
-  const api = await fetch(
-    `https://api.weatherapi.com/v1/forecast.json?key=7d77b96c972b4d119a3151101212704&q=${city}&days=3`
-  );
+  try {
+    loader.classList.remove("d-none");
+    const api = await fetch(
+      `https://api.weatherapi.com/v1/forecast.json?key=7d77b96c972b4d119a3151101212704&q=${city}&days=3`
+    );
 
-  if(!api.ok){
-    throw new Error ("errorrrrrrrrrrr");
+    if (!api.ok) {
+      throw new Error("errorrrrrrrrrrr");
+    }
+    const response = await api.json();
+    console.log(response);
+    displayData(response);
+  } catch (error) {
+    console.log(error);
+    model.classList.remove("hidden");
+    overlay.classList.remove("hidden");
+  } finally {
+    loader.classList.add("d-none");
   }
-  const response = await api.json();
-  console.log(response);
-  displayData(response);
- } catch (error) {
-  console.log(error);
-  model.classList.remove("hidden");
-  overlay.classList.remove("hidden");
- }finally{
-  loader.classList.add("d-none");
- }
 }
 
 // current
 function displayData(data) {
-  let [day, time] = data.current.last_updated.split(" ");
-  let [x, y, z] = day.split("-");
+  let [date, time] = data.current.last_updated.split(" ");
+  let [x, y, z] = date.split("-");
+
+  let dayName = getDay(date);
   let html = `
   
      <div class="text-center text-light p-3 cur">
      <div class="d-flex justify-content-between">
-     <h4> mon</h4>
+     <h4> ${dayName}</h4>
      <h4> ${z}-${y}</h4>
      </div>
       <h2 class="h1">${data.location.name}</h2>
@@ -82,10 +85,13 @@ function createElement(data, index, sty) {
 
   let [day, time] = current.date.split(" ");
   let [f, g, h] = day.split("-");
+
+  let dayName = getDay(current.date);
+
   return (html = `
   <div class="text-center text-light  ${sty}">
               <div class="d-flex justify-content-between align-items-start">
-                <h4>mon</h4>
+                <h4>${dayName}</h4>
                 <h4>${h}-${g}</h4>
               </div>
               <img src=" ${current.day.condition.icon}" alt="logo" />
@@ -111,6 +117,20 @@ function createElement(data, index, sty) {
   `);
 }
 
+function getDay(date) {
+  const weekday = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+
+  const d = new Date(date);
+  return weekday[d.getDay()];
+}
 
 const close = function () {
   model.classList.add("hidden");
